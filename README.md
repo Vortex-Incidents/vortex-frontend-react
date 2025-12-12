@@ -1,1 +1,1 @@
-# vortex-frontend-angular
+# vortex-frontend-react
