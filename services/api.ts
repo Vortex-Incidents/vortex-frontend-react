@@ -6,7 +6,7 @@ const PYTHON_API_URL = import.meta.env.VITE_API_PYTHON_URL || 'https://vortex-se
 
 // 1. Main API Instance (Java Core)
 export const mainApi = axios.create({
-    baseURL: JAVA_API_URL,
+    baseURL: '/api/v1', // Changed to relative path to use Vite Proxy
     headers: {
         'Content-Type': 'application/json',
     },
@@ -38,7 +38,7 @@ mainApi.interceptors.response.use((response) => response, (error) => {
 
 // 2. AI API Instance (Python Triage/Chat)
 export const aiApi = axios.create({
-    baseURL: PYTHON_API_URL,
+    baseURL: '/api/ai', // Use Proxy to avoid CORS
     headers: {
         'Content-Type': 'application/json',
     },

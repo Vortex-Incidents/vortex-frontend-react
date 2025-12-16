@@ -1,6 +1,14 @@
 {
     "rewrites": [
         {
+            "source": "/api/v1/(.*)",
+            "destination": "https://vortex-java-core.onrender.com/api/v1/$1"
+        },
+        {
+            "source": "/api/ai/(.*)",
+            "destination": "https://vortex-service-triage-ml.onrender.com/$1"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }

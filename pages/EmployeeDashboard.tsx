@@ -108,7 +108,13 @@ const EmployeeDashboard: React.FC = () => {
                                         <td className="px-6 py-4 font-medium dark:text-gray-200">{inc.id.slice(0, 8)}...</td>
                                         <td className="px-6 py-4">{inc.title}</td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded text-xs font-medium ${inc.status === 'Open' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-800'}`}>{inc.status}</span>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${inc.status === 'Open' ? 'bg-amber-100 text-amber-700 border-amber-200' :
+                                                    inc.status === 'In Progress' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                                                        inc.status === 'Resolved' ? 'bg-green-100 text-green-700 border-green-200' :
+                                                            'bg-gray-100 text-gray-700 border-gray-200'
+                                                }`}>
+                                                {inc.status}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4">{new Date(inc.createdAt).toLocaleDateString()}</td>
                                     </tr>

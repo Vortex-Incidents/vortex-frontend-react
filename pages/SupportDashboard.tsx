@@ -71,12 +71,20 @@ const SupportDashboard: React.FC = () => {
                     {filteredIncidents.map(incident => (
                         <div key={incident.id} className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 shadow-sm hover:shadow-md transition p-5">
                             <div className="flex justify-between items-start mb-3">
-                                <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider ${incident.priority === 'Critical' ? 'bg-red-100 text-red-700' :
+                                <div className="flex gap-2">
+                                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider ${incident.priority === 'Critical' ? 'bg-red-100 text-red-700' :
                                         incident.priority === 'High' ? 'bg-orange-100 text-orange-700' :
                                             'bg-blue-100 text-blue-700'
-                                    }`}>
-                                    {incident.priority}
-                                </span>
+                                        }`}>
+                                        {incident.priority}
+                                    </span>
+                                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider border ${incident.status === 'Open' ? 'bg-gray-100 text-gray-600 border-gray-200' :
+                                        incident.status === 'In Progress' ? 'bg-blue-100 text-blue-600 border-blue-200' :
+                                            'bg-green-100 text-green-600 border-green-200'
+                                        }`}>
+                                        {incident.status}
+                                    </span>
+                                </div>
                                 <button className="text-gray-400 hover:text-gray-600"><MoreHorizontal size={18} /></button>
                             </div>
                             <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">{incident.title}</h3>

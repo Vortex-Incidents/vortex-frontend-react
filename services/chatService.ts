@@ -8,10 +8,8 @@ export interface ChatResponse {
 
 export const chatWithBot = async (message: string, language: string = 'es'): Promise<string> => {
     try {
-        const response = await aiApi.post<ChatResponse>('/chat/message', { message, language });
-        // Assuming API returns { response: "..." } or similar. Adjust based on real API contract.
-        // User prompt implies: Payload: {message, language}. Response?
-        // Usually { response: "text" }
+        // Updated to match backend route structure: /api/v1/chat/message
+        const response = await aiApi.post<ChatResponse>('/api/v1/chat/message', { message, language });
         return response.data.response || "I didn't quite catch that.";
     } catch (error) {
         console.error("Chat API Error:", error);
@@ -21,7 +19,7 @@ export const chatWithBot = async (message: string, language: string = 'es'): Pro
 
 export const classifyIncidentAI = async (text: string): Promise<AIClassification> => {
     try {
-        const response = await aiApi.post<AIClassification>('/triage/predict', { description: text });
+        const response = await aiApi.post<AIClassification>('/api/v1/triage/predict', { description: text });
         return response.data;
     } catch (error) {
         console.error("Triage API Error:", error);

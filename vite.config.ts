@@ -9,10 +9,18 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: '0.0.0.0',
       proxy: {
-        '/api': {
+        // Proxy /api/v1 to Java Backend
+        '/api/v1': {
           target: 'https://vortex-java-core.onrender.com',
           changeOrigin: true,
           secure: false,
+        },
+        // Proxy /api/ai to Python Backend
+        '/api/ai': {
+          target: 'https://vortex-service-triage-ml.onrender.com', // Python Backend URL
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api\/ai/, ''), // Remove /api/ai prefix when sending to backend
         }
       }
     },
