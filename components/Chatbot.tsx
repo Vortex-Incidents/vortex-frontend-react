@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Bot, User, Aperture } from 'lucide-react';
-import { chatWithIVA } from '../services/geminiService';
+import { chatWithBot } from '../services/chatService';
 
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,12 +27,14 @@ const Chatbot: React.FC = () => {
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setIsLoading(true);
 
-    // Filter history for API context (last 10 messages to save context window)
-    const history = messages.slice(-10);
-    const reply = await chatWithIVA(history, userMsg);
-
-    setMessages(prev => [...prev, { role: 'model', text: reply }]);
-    setIsLoading(false);
+    try {
+      const reply = await chatWithBot(userMsg, 'es');
+      setMessages(prev => [...prev, { role: 'model', text: reply }]);
+    } catch (e) {
+      setMessages(prev => [...prev, { role: 'model', text: "Connection error." }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,25 +57,24 @@ const Chatbot: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-dark-900/50">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl p-3 text-sm shadow-sm ${
-                  msg.role === 'user' 
-                    ? 'bg-primary-600 text-white rounded-br-none' 
+                <div className={`max-w-[85%] rounded-2xl p-3 text-sm shadow-sm ${msg.role === 'user'
+                    ? 'bg-primary-600 text-white rounded-br-none'
                     : 'bg-white dark:bg-dark-700 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-dark-600 rounded-bl-none'
-                }`}>
+                  }`}>
                   {msg.text}
                 </div>
               </div>
             ))}
             {isLoading && (
-               <div className="flex justify-start">
-                 <div className="bg-white dark:bg-dark-700 p-3 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-dark-600">
-                    <div className="flex space-x-1">
-                      <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                    </div>
-                 </div>
-               </div>
+              <div className="flex justify-start">
+                <div className="bg-white dark:bg-dark-700 p-3 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-dark-600">
+                  <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -88,7 +89,7 @@ const Chatbot: React.FC = () => {
               placeholder="Query Vortex AI..."
               className="flex-1 bg-gray-100 dark:bg-dark-900 border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-primary-500 dark:text-white"
             />
-            <button 
+            <button
               onClick={handleSend}
               disabled={isLoading || !input.trim()}
               className="p-2 bg-primary-600 text-white rounded-full hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-primary-500/20"

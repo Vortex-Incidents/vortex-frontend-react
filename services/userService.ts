@@ -1,68 +1,47 @@
+import { mainApi } from './api';
 import { User, Role } from '../types';
-
-const AUTH_URL = 'https://vortex-java-core.onrender.com/api/v1/auth';
-const USERS_URL = 'https://vortex-java-core.onrender.com/api/v1/users';
 
 interface LoginResponse {
     token: string;
-    user?: User; // Backend might return user info, if not we decode or fetch
+    user?: User;
+    role?: Role;
 }
 
-export const loginApi = async (email: string, password: string): Promise<{ token: string, role: Role }> => {
-    try {
-        const response = await fetch(`${AUTH_URL}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
+export const loginApi = async (email: string, password: string): Promise<{ token: string, role: Role, user: User }> => {
+    // POST /auth/login
+    // Payload: { email, password }
+    const response = await mainApi.post<LoginResponse>('/auth/login', { email, password });
 
-        if (!response.ok) throw new Error('Login failed');
+    // Backend returns { token, user: {...} } or similar. Adjust based on real API.
+    // If backend only returns token, we might need to fetch /me or infer role.
 
-        const data: LoginResponse = await response.json();
+    const token = response.data.token;
 
-        // Store token
-        localStorage.setItem('token', data.token);
+    // Assume backend returns role in response, OR we decode it, OR we fetch it.
+    // For "Senior" implementation, let's assume valid response structure or fetch /me if missing.
+    let user = response.data.user;
+    let role = response.data.role || user?.role || 'employee';
 
-        // Simple decoding or default role if backend doesn't send it. 
-        // For this guide, we assume the backend might return user data or we default.
-        // The user guide says response is just token. We might need to fetch profile or parse JWT.
-        // For now, let's look for a role in the response or default to 'employee'.
-        // Or we decode the token if it's a standard JWT.
-
-        return { token: data.token, role: 'employee' }; // Placeholder role, should be parsed from token or response
-    } catch (error) {
-        console.error('Login error:', error);
-        throw error;
+    // If User object is missing but we have token, we should construct a basic user or fetch profile
+    if (!user) {
+        user = {
+            id: 'valid-id',
+            email: email,
+            name: email.split('@')[0],
+            role: role as Role,
+            avatar: `https://ui-avatars.com/api/?name=${email}&background=random`
+        };
     }
+
+    return { token, role: role as Role, user };
 };
 
-export const getUsersApi = async (): Promise<any[]> => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
-
-    const response = await fetch(USERS_URL, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    });
-
-    if (!response.ok) throw new Error('Failed to fetch users');
-    return await response.json();
+export const getUsersApi = async (): Promise<User[]> => {
+    const response = await mainApi.get<User[]>('/users');
+    return response.data;
 };
 
-export const createUserApi = async (userData: any): Promise<any> => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(USERS_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(userData)
-    });
-
-    if (!response.ok) throw new Error('Failed to create user');
-    return await response.json();
+export const createUserApi = async (userData: any): Promise<User> => {
+    const response = await mainApi.post<User>('/users', userData);
+    return response.data;
 };

@@ -1,98 +1,124 @@
 import React, { useState } from 'react';
-import { User, Lock, Mail, Moon, Sun, Shield } from 'lucide-react';
-import { User as UserType } from '../types';
+import { User, Mail, Shield, Key, Moon, Sun, Monitor } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface ProfileProps {
-  user: UserType;
-  onThemeToggle: () => void;
-  theme: 'light' | 'dark';
+    // Props no longer needed from App.tsx, but keeping signature flexible or using Context
+    user?: any;
+    theme?: 'light' | 'dark';
+    onThemeToggle?: () => void;
 }
 
-const Profile: React.FC<ProfileProps> = ({ user, onThemeToggle, theme }) => {
-    const [simulatedPassword, setSimulatedPassword] = useState('');
+const Profile: React.FC<ProfileProps> = ({ theme, onThemeToggle }) => {
+    const { user } = useAuth(); // Use context instead of props
+
+    // Local state for forms
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-  return (
-    <div className="container mx-auto px-4 py-12 max-w-3xl animate-fade-in">
-        <div className="bg-white dark:bg-dark-800 rounded-2xl shadow-lg border border-gray-200 dark:border-dark-700 overflow-hidden">
-            <div className="h-32 bg-primary-600 relative">
-                <div className="absolute -bottom-12 left-8">
-                    <img src={user.avatar} alt="Profile" className="w-24 h-24 rounded-full border-4 border-white dark:border-dark-800" />
-                </div>
-            </div>
-            
-            <div className="pt-16 px-8 pb-8">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{user.name}</h1>
-                        <p className="text-gray-500">{user.email}</p>
+    if (!user) return <div>Loading Profile...</div>;
+
+    return (
+        <div className="container mx-auto px-4 py-8 max-w-4xl animate-fade-in">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Account Settings</h1>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Sidebar / Info Card */}
+                <div className="md:col-span-1 space-y-6">
+                    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-6 text-center shadow-sm">
+                        <img
+                            src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
+                            alt={user.name}
+                            className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-gray-50 dark:border-dark-700"
+                        />
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">{user.name}</h2>
+                        <span className="inline-block mt-2 px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-xs font-bold uppercase tracking-wide rounded-full">
+                            {user.role}
+                        </span>
                     </div>
-                    <span className="px-3 py-1 bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium capitalize flex items-center">
-                        <Shield size={14} className="mr-1" />
-                        {user.role}
-                    </span>
+
+                    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-6 shadow-sm">
+                        <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Contact Info</h3>
+                        <div className="space-y-4">
+                            <div className="flex items-center text-gray-600 dark:text-gray-300">
+                                <Mail size={18} className="mr-3 text-gray-400" />
+                                <span className="text-sm">{user.email}</span>
+                            </div>
+                            <div className="flex items-center text-gray-600 dark:text-gray-300">
+                                <Shield size={18} className="mr-3 text-gray-400" />
+                                <span className="text-sm capitalize">{user.role} Access</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="mt-8 border-t border-gray-200 dark:border-dark-700 pt-8 space-y-8">
-                    
-                    {/* Theme Preference */}
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Preferences</h2>
-                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-900/50 rounded-xl">
-                            <div className="flex items-center space-x-3">
-                                {theme === 'light' ? <Sun className="text-orange-500" /> : <Moon className="text-blue-400" />}
-                                <span className="text-gray-700 dark:text-gray-300">Interface Theme</span>
-                            </div>
-                            <button onClick={onThemeToggle} className="text-sm text-primary-600 font-medium hover:underline">
-                                Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+                {/* Main Settings Form */}
+                <div className="md:col-span-2 space-y-6">
+                    {/* Theme Settings */}
+                    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <Monitor size={20} className="mr-2" /> Appearance
+                        </h3>
+                        <div className="flex items-center justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">Interface Theme</span>
+                            <button
+                                onClick={onThemeToggle}
+                                className="flex items-center px-4 py-2 bg-gray-100 dark:bg-dark-700 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition"
+                            >
+                                {theme === 'dark' ? <Moon size={18} className="mr-2" /> : <Sun size={18} className="mr-2" />}
+                                {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
                             </button>
                         </div>
                     </div>
 
-                    {/* Security (Simulated) */}
-                    <div>
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Security</h2>
+                    {/* Security Settings */}
+                    <div className="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                            <Key size={20} className="mr-2" /> Security
+                        </h3>
+
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">New Password</label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
-                                    <input 
-                                        type="password" 
-                                        value={simulatedPassword}
-                                        onChange={(e) => setSimulatedPassword(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-dark-600 bg-transparent text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none"
-                                        placeholder="••••••••"
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Current Password</label>
+                                <input
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none"
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">New Password</label>
+                                    <input
+                                        type="password"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none"
                                     />
                                 </div>
-                            </div>
-                            
-                            {/* Added Confirm Password Field */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Confirm New Password</label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
-                                    <input 
-                                        type="password" 
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">Confirm New Password</label>
+                                    <input
+                                        type="password"
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-dark-600 bg-transparent text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none"
-                                        placeholder="••••••••"
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-dark-600 bg-white dark:bg-dark-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 outline-none"
                                     />
                                 </div>
                             </div>
-
-                            <button className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:opacity-90 transition mt-2">
-                                Update Password
-                            </button>
+                            <div className="pt-4 flex justify-end">
+                                <button className="px-6 py-2 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg shadow transition">
+                                    Update Password
+                                </button>
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
-    </div>
-  );
+    );
 };
 
 export default Profile;
